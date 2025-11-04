@@ -43,7 +43,10 @@ INSTALLED_APPS = [
 
     #Apps propias
     'core',
-    'accounts'
+    'accounts',
+    'humanResources',
+    'academics',
+    'locations'
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
