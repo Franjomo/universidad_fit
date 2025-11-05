@@ -5,7 +5,7 @@ from django.utils import timezone
 class Program(models.Model):
     code = models.AutoField(primary_key=True)
     name = models.CharField(max_length=40)
-    area = models.ForeignKey('Area', on_delete=models.CASCADE, related_name='programs')
+    area = models.ForeignKey('locations.Area', on_delete=models.CASCADE, related_name='programs')
 
     def __str__(self):
         return f"{self.name} ({self.code})"
@@ -25,14 +25,14 @@ class Group(models.Model):
     number = models.IntegerField()
     semester = models.CharField(max_length=6)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='groups')
-    professor = models.ForeignKey('Employee', on_delete=models.CASCADE, related_name='groups')
+    professor = models.ForeignKey('accounts.Employee', on_delete=models.CASCADE, related_name='groups')
 
     def __str__(self):
         return f"{self.subject.name} - NRC {self.nrc}"
 
 
 class Enrollment(models.Model):
-    student = models.ForeignKey('Student', on_delete=models.CASCADE, related_name='enrollments')
+    student = models.ForeignKey('accounts.Student', on_delete=models.CASCADE, related_name='enrollments')
     group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='enrollments')
     enrollment_date = models.DateField(default=timezone.now)
     status = models.CharField(max_length=15)

@@ -34,8 +34,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     created_at = models.DateTimeField(auto_now_add=True)
 
     # relaciones
-    student = models.OneToOneField('students.Student', on_delete=models.SET_NULL, null=True, blank=True, related_name='user')
-    employee = models.OneToOneField('employees.Employee', on_delete=models.SET_NULL, null=True, blank=True, related_name='user')
+    student = models.OneToOneField('accounts.Student', on_delete=models.SET_NULL, null=True, blank=True, related_name='user')
+    employee = models.OneToOneField('accounts.Employee', on_delete=models.SET_NULL, null=True, blank=True, related_name='user')
+
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
