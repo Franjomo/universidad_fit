@@ -1,76 +1,73 @@
 from django.db import models
 
 class Country(models.Model):
-    code = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=40, unique=True)
+    code = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=20)
+
+    class Meta:
+        db_table = 'countries'
 
     def __str__(self):
         return self.name
 
 class Department(models.Model):
-    code = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=40)
-    country = models.ForeignKey(Country, on_delete=models.CASCADE, related_name='departments')
+    code = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=20)
+    country = models.ForeignKey('locations.Country', on_delete=models.CASCADE, db_column='country_code')
 
     class Meta:
-        unique_together = ('name', 'country')
+        db_table = 'departments'
 
     def __str__(self):
-        return f"{self.name} ({self.country.name})"
+        return self.name
 
 
 class City(models.Model):
-    code = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=40)
-    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='cities')
+    code = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=20)
+    department = models.ForeignKey('locations.Department', on_delete=models.CASCADE, db_column='dept_code')
 
     class Meta:
-        unique_together = ('name', 'department')
+        db_table = 'cities'
 
     def __str__(self):
-        return f"{self.name}, {self.department.name}"
+        return self.name
 
 
 class Campus(models.Model):
-    code = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=40)
-    city = models.ForeignKey(City, on_delete=models.CASCADE, related_name='campuses')
+    code = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=20, null=True, blank=True)
+    city = models.ForeignKey('locations.City', on_delete=models.CASCADE, db_column='city_code')
 
     class Meta:
         db_table = 'campuses'
-        ordering = ['name']
-        verbose_name = 'Campus'
-        verbose_name_plural = 'Campuses'
 
     def __str__(self):
-        return f"{self.name} ({self.city.name})"
+        return self.name or f"Campus {self.code}"
 
 
 class Faculty(models.Model):
-    code = models.AutoField(primary_key=True)
+    code = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=40)
-    campus = models.ForeignKey(Campus, on_delete=models.CASCADE, related_name='faculties')
+    location = models.CharField(max_length=15)
+    phone_number = models.CharField(max_length=15)
+    dean_id = models.CharField(max_length=15, null=True, blank=True, unique=True)
 
     class Meta:
         db_table = 'faculties'
-        ordering = ['name']
-        verbose_name = 'Faculty'
-        verbose_name_plural = 'Faculties'
 
     def __str__(self):
         return self.name
 
 
 class Area(models.Model):
-    code = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=40)
-    faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, related_name='areas')
+    code = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=20)
+    faculty = models.ForeignKey('locations.Faculty', on_delete=models.CASCADE, db_column='faculty_code')
+    coordinator_id = models.CharField(max_length=15, unique=True)
 
     class Meta:
         db_table = 'areas'
-        ordering = ['name']
-        verbose_name = 'Area'
-        verbose_name_plural = 'Areas'
 
     def __str__(self):
-        return f"{self.name} - {self.faculty.name}"
+        return self.name
