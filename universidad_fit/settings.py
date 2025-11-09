@@ -51,7 +51,8 @@ INSTALLED_APPS = [
     'accounts',
     'humanResources',
     'academics',
-    'locations'
+    'locations',
+    'fitness'
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
