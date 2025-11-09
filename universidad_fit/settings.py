@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+from mongoengine import connect
+from urllib.parse import quote_plus
 from pathlib import Path
 import os
 from dotenv import load_dotenv
@@ -41,7 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     #Dependencias adicionales
-
+    'rest_framework',
+    'corsheaders',
 
     #Apps propias
     'core',
@@ -56,6 +59,7 @@ AUTH_USER_MODEL = 'accounts.User'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -90,6 +94,7 @@ DATABASES = {
 }
 
 MONGO_URL = os.getenv('MONGO_URL')
+connect(host=MONGO_URL)
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -131,3 +136,24 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# REST Framework Configuration
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+}
+
+# CORS Configuration
+# Allow React frontend to communicate with Django backend
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173',  # Vite default
+    'http://localhost:3000',  # Create React App default
+]
+
+CORS_ALLOW_CREDENTIALS = True

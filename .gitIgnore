@@ -229,3 +229,18 @@ __marimo__/
 
 # env files (databases, API keys, secrets, etc.)
 .env
+
+# Warp configuration
+WARP.md
+
+# React / Node.js
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
