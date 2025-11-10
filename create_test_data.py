@@ -72,13 +72,11 @@ def create_test_data():
     routine1 = RoutineSQL.objects.create(
         name="Beginner Full Body",
         description="A complete beginner workout routine",
-        exercises_data={
-            "exercises": [
-                {"exercise_id": exercise1.id, "sets": 3, "reps": 10, "rest": 60},
-                {"exercise_id": exercise3.id, "sets": 3, "reps": 15, "rest": 60},
-                {"exercise_id": exercise4.id, "duration": 900}  # 15 min
-            ]
-        },
+        exercises=[
+            {"exercise_id": exercise1.id, "sets": 3, "reps": 10, "rest": 60},
+            {"exercise_id": exercise3.id, "sets": 3, "reps": 15, "rest": 60},
+            {"exercise_id": exercise4.id, "duration": 15}  # 15 min
+        ],
         created_by="system",
         is_pre_designed=True
     )
@@ -87,12 +85,10 @@ def create_test_data():
     routine2 = RoutineSQL.objects.create(
         name="Cardio Blast",
         description="High-intensity cardio workout",
-        exercises_data={
-            "exercises": [
-                {"exercise_id": exercise2.id, "duration": 1800},  # 30 min
-                {"exercise_id": exercise5.id, "sets": 5, "reps": 10, "rest": 45}
-            ]
-        },
+        exercises=[
+            {"exercise_id": exercise2.id, "duration": 30},  # 30 min
+            {"exercise_id": exercise5.id, "sets": 5, "reps": 10, "rest": 45}
+        ],
         created_by="system",
         is_pre_designed=True
     )
@@ -101,12 +97,10 @@ def create_test_data():
     routine3 = RoutineSQL.objects.create(
         name="Strength Builder",
         description="Build muscle and strength",
-        exercises_data={
-            "exercises": [
-                {"exercise_id": exercise1.id, "sets": 4, "reps": 12, "rest": 90},
-                {"exercise_id": exercise3.id, "sets": 4, "reps": 20, "rest": 90}
-            ]
-        },
+        exercises=[
+            {"exercise_id": exercise1.id, "sets": 4, "reps": 12, "rest": 90},
+            {"exercise_id": exercise3.id, "sets": 4, "reps": 20, "rest": 90}
+        ],
         created_by="system",
         is_pre_designed=True
     )

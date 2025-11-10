@@ -19,7 +19,4 @@ urlpatterns = [
     path('recommendations/', views.recommendation_list, name='recommendation-list'),
     path('recommendations/<str:recommendation_id>/', views.recommendation_detail, name='recommendation-detail'),
     
-    # Follow-ups
-    path('followups/', views.followup_list, name='followup-list'),
-    path('followups/<str:followup_id>/', views.followup_detail, name='followup-detail'),
 ]
