@@ -43,15 +43,6 @@ db.sqlite3-journal
 *~
 .DS_Store
 
-# Frontend (React/Vite)
-frontend_fitness/node_modules/
-frontend_fitness/dist/
-frontend_fitness/.vite/
-frontend_fitness/build/
-frontend_fitness/.env
-frontend_fitness/.env.local
-frontend_fitness/.env.*.local
-
 # Testing
 .coverage
 .pytest_cache/
