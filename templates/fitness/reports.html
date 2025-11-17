@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reportes - Universidad Fit{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">Mis Reportes</h1>
+    </div>
+
+    <!-- Reporte 1: Progreso Semanal -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="card-title">Progreso Semanal</h2>
+        </div>
+        <div class="chart-container">
+            <canvas id="weeklyProgressChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Reporte 2: Distribución por Tipo de Ejercicio -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="card-title">Distribución de Ejercicios por Tipo</h2>
+        </div>
+        <div class="chart-container">
+            <canvas id="exerciseTypeChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Reporte 3: Esfuerzo Promedio -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="card-title">Evolución del Nivel de Esfuerzo</h2>
+        </div>
+        <div class="chart-container">
+            <canvas id="effortLevelChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Tabla de Resumen -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Resumen de Actividad</h2>
+        </div>
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Período</th>
+                        <th>Total Entrenamientos</th>
+                        <th>Minutos Totales</th>
+                        <th>Esfuerzo Promedio</th>
+                        <th>Rutinas Completadas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for summary in activity_summary %}
+                    <tr>
+                        <td>{{ summary.period }}</td>
+                        <td>{{ summary.total_workouts }}</td>
+                        <td>{{ summary.total_minutes|floatformat:0 }}</td>
+                        <td>{{ summary.avg_effort|floatformat:1 }}/10</td>
+                        <td>{{ summary.routines_completed }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Datos desde Django (pasar como JSON en el contexto)
+    const weeklyData = {{ weekly_progress_data|safe|default:"{}" }};
+    const exerciseTypeData = {{ exercise_type_data|safe|default:"{}" }};
+    const effortLevelData = {{ effort_level_data|safe|default:"{}" }};
+
+    // Gráfico de Progreso Semanal
+    if (weeklyData.labels && weeklyData.values) {
+        createProgressChart('weeklyProgressChart', {
+            labels: weeklyData.labels,
+            values: weeklyData.values,
+            label: 'Entrenamientos por Semana'
+        });
+    }
+
+    // Gráfico de Distribución por Tipo
+    if (exerciseTypeData.labels && exerciseTypeData.values) {
+        createPieChart('exerciseTypeChart', {
+            labels: exerciseTypeData.labels,
+            values: exerciseTypeData.values
+        });
+    }
+
+    // Gráfico de Nivel de Esfuerzo
+    if (effortLevelData.labels && effortLevelData.values) {
+        createProgressChart('effortLevelChart', {
+            labels: effortLevelData.labels,
+            values: effortLevelData.values,
+            label: 'Nivel de Esfuerzo Promedio'
+        });
+    }
+</script>
+{% endblock %}
+

@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mi Progreso - Universidad Fit{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">Mi Progreso</h1>
+        <a href="{% url 'progress_create' %}" class="btn btn-primary">➕ Registrar Nuevo Progreso</a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="d-flex justify-between align-center mb-3" style="flex-wrap: wrap; gap: 1rem;">
+        <input 
+            type="date" 
+            id="filterDateFrom" 
+            class="form-control" 
+            style="max-width: 200px;"
+        >
+        <input 
+            type="date" 
+            id="filterDateTo" 
+            class="form-control" 
+            style="max-width: 200px;"
+        >
+        <button type="button" class="btn btn-outline" onclick="filterProgress()">Filtrar</button>
+        <button type="button" class="btn btn-secondary" onclick="clearFilters()">Limpiar</button>
+    </div>
+
+    <!-- Lista de Progreso -->
+    {% if progress_list %}
+    <div id="progressList">
+        {% for progress in progress_list %}
+        <div class="progress-item" data-date="{{ progress.date|date:'Y-m-d' }}">
+            <div class="progress-header">
+                <div>
+                    <h3>{{ progress.date|date:"d/m/Y" }}</h3>
+                    <p class="progress-date">{{ progress.date|date:"l, d \d\e F \d\e Y" }}</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'progress_detail' progress.id %}" class="btn btn-outline btn-sm">Ver Detalles</a>
+                    <a href="{% url 'progress_edit' progress.id %}" class="btn btn-primary btn-sm">Editar</a>
+                </div>
+            </div>
+            
+            {% if progress.routine_id %}
+            <p><strong>Rutina:</strong> {{ progress.routine_name|default:progress.routine_id }}</p>
+            {% elif progress.exercise_id %}
+            <p><strong>Ejercicio:</strong> {{ progress.exercise_name|default:progress.exercise_id }}</p>
+            {% endif %}
+
+            <div class="progress-metrics">
+                {% if progress.repetitions %}
+                <div class="metric">
+                    <div class="metric-value">{{ progress.repetitions }}</div>
+                    <div class="metric-label">Repeticiones</div>
+                </div>
+                {% endif %}
+                {% if progress.duration %}
+                <div class="metric">
+                    <div class="metric-value">{{ progress.duration|floatformat:0 }}</div>
+                    <div class="metric-label">Minutos</div>
+                </div>
+                {% endif %}
+                {% if progress.effort_level %}
+                <div class="metric">
+                    <div class="metric-value">{{ progress.effort_level }}/10</div>
+                    <div class="metric-label">Nivel de Esfuerzo</div>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if progress.notes %}
+            <div class="mt-2">
+                <p><strong>Notas:</strong> {{ progress.notes }}</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">📊</div>
+        <h3>No hay registros de progreso</h3>
+        <p>Comienza a registrar tu progreso para ver tus avances</p>
+        <a href="{% url 'progress_create' %}" class="btn btn-primary mt-2">Registrar Progreso</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function filterProgress() {
+        const dateFrom = document.getElementById('filterDateFrom').value;
+        const dateTo = document.getElementById('filterDateTo').value;
+        const items = document.querySelectorAll('.progress-item');
+        
+        items.forEach(item => {
+            const itemDate = item.getAttribute('data-date');
+            let show = true;
+            
+            if (dateFrom && itemDate < dateFrom) show = false;
+            if (dateTo && itemDate > dateTo) show = false;
+            
+            item.style.display = show ? '' : 'none';
+        });
+    }
+    
+    function clearFilters() {
+        document.getElementById('filterDateFrom').value = '';
+        document.getElementById('filterDateTo').value = '';
+        const items = document.querySelectorAll('.progress-item');
+        items.forEach(item => item.style.display = '');
+    }
+</script>
+{% endblock %}
+

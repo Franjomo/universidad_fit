@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reportes Administrativos - Universidad Fit{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">Reportes Administrativos</h1>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Volver</a>
+    </div>
+
+    <!-- Reporte 1: Uso de la Plataforma -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="card-title">Uso de la Plataforma por Mes</h2>
+        </div>
+        <div class="chart-container">
+            <canvas id="platformUsageChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Reporte 2: Actividad por Tipo de Usuario -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="card-title">Actividad por Tipo de Usuario</h2>
+        </div>
+        <div class="chart-container">
+            <canvas id="userActivityChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Tabla de Estadísticas Generales -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Estadísticas Generales</h2>
+        </div>
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Métrica</th>
+                        <th>Valor</th>
+                        <th>Cambio vs Mes Anterior</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in general_stats %}
+                    <tr>
+                        <td>{{ stat.metric }}</td>
+                        <td><strong>{{ stat.value }}</strong></td>
+                        <td>
+                            <span class="badge badge-{% if stat.change >= 0 %}success{% else %}danger{% endif %}">
+                                {{ stat.change|floatformat:1 }}%
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Datos desde Django
+    const platformUsageData = {{ platform_usage_data|safe|default:"{}" }};
+    const userActivityData = {{ user_activity_data|safe|default:"{}" }};
+
+    // Gráfico de Uso de Plataforma
+    if (platformUsageData.labels && platformUsageData.datasets) {
+        createBarChart('platformUsageChart', platformUsageData);
+    }
+
+    // Gráfico de Actividad por Tipo de Usuario
+    if (userActivityData.labels && userActivityData.datasets) {
+        createBarChart('userActivityChart', userActivityData);
+    }
+</script>
+{% endblock %}
+

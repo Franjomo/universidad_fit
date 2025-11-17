@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mi Dashboard - Universidad Fit{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">Bienvenido, {{ user.username }}</h1>
+    </div>
+
+    <!-- Estadísticas Rápidas -->
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <div class="stat-value">{{ total_routines|default:0 }}</div>
+            <div class="stat-label">Rutinas Activas</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ total_progress|default:0 }}</div>
+            <div class="stat-label">Registros de Progreso</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ weekly_workouts|default:0 }}</div>
+            <div class="stat-label">Entrenamientos Esta Semana</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ current_streak|default:0 }}</div>
+            <div class="stat-label">Días Consecutivos</div>
+        </div>
+    </div>
+</div>
+
+<!-- Notificaciones y Avisos -->
+{% if notifications %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">📢 Notificaciones y Avisos</h2>
+    </div>
+    <div class="grid">
+        {% for notification in notifications %}
+        <div class="exercise-card">
+            <h3>{{ notification.title }}</h3>
+            <p>{{ notification.message }}</p>
+            <small style="color: var(--text-secondary);">
+                {{ notification.date|date:"d/m/Y" }}
+            </small>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Rutinas Recientes -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Mis Rutinas</h2>
+        <a href="{% url 'routines_list' %}" class="btn btn-primary">Ver Todas</a>
+    </div>
+    {% if recent_routines %}
+    <div class="grid grid-2">
+        {% for routine in recent_routines %}
+        <div class="routine-card" onclick="window.location.href='{% url 'routine_detail' routine.id %}'">
+            <div class="routine-header">
+                <h3 class="routine-title">{{ routine.name }}</h3>
+                {% if routine.is_template %}
+                <span class="badge badge-info">Plantilla</span>
+                {% endif %}
+            </div>
+            <p class="exercise-description">{{ routine.description|truncatewords:20 }}</p>
+            <div class="exercise-details">
+                <span class="exercise-detail">
+                    <strong>{{ routine.exercises|length }}</strong> ejercicios
+                </span>
+                <span class="exercise-detail">
+                    Creada: {{ routine.created_at|date:"d/m/Y" }}
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">🏃</div>
+        <h3>No tienes rutinas aún</h3>
+        <p>Crea tu primera rutina o elige una de las plantillas disponibles</p>
+        <a href="{% url 'routines_list' %}" class="btn btn-primary mt-2">Explorar Rutinas</a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Progreso Reciente -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Mi Progreso Reciente</h2>
+        <a href="{% url 'progress_list' %}" class="btn btn-outline">Ver Todo</a>
+    </div>
+    {% if recent_progress %}
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Rutina/Ejercicio</th>
+                    <th>Repeticiones</th>
+                    <th>Duración</th>
+                    <th>Esfuerzo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for progress in recent_progress %}
+                <tr>
+                    <td>{{ progress.date|date:"d/m/Y" }}</td>
+                    <td>
+                        {% if progress.routine_id %}
+                            Rutina: {{ progress.routine_id }}
+                        {% elif progress.exercise_id %}
+                            Ejercicio: {{ progress.exercise_id }}
+                        {% else %}
+                            General
+                        {% endif %}
+                    </td>
+                    <td>{{ progress.repetitions|default:"-" }}</td>
+                    <td>{{ progress.duration|default:"-" }} min</td>
+                    <td>
+                        <span class="badge badge-{% if progress.effort_level >= 8 %}danger{% elif progress.effort_level >= 5 %}warning{% else %}success{% endif %}">
+                            {{ progress.effort_level }}/10
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">📊</div>
+        <h3>No hay registros de progreso</h3>
+        <p>Comienza a registrar tu progreso para ver tus avances</p>
+        <a href="{% url 'progress_create' %}" class="btn btn-primary mt-2">Registrar Progreso</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

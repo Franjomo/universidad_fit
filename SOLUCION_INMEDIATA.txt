@@ -1,0 +1,38 @@
+==========================================
+  SOLUCION INMEDIATA - ERROR DE PERMISOS
+==========================================
+
+PROBLEMA:
+El usuario de PostgreSQL no tiene permisos para 
+acceder a la tabla django_session.
+
+SOLUCION RAPIDA (2 minutos):
+----------------------------
+
+1. Abre el archivo .env en la raíz del proyecto
+
+2. Comenta o elimina esta línea:
+   DATABASE_URL=postgresql://...
+
+   Debe quedar así:
+   # DATABASE_URL=postgresql://...
+   
+   O simplemente elimina la línea completa.
+
+3. Detén el servidor (Ctrl + C)
+
+4. Ejecuta:
+   python manage.py migrate
+   python crear_usuarios.py
+
+5. Reinicia el servidor:
+   python manage.py runserver
+
+6. Prueba cerrar sesión - debería funcionar ahora!
+
+==========================================
+¿Por qué funciona?
+SQLite no requiere permisos como PostgreSQL.
+Es perfecto para desarrollo.
+==========================================
+

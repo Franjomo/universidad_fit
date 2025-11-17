@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ exercise.name }} - Universidad Fit{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h1 class="card-title">{{ exercise.name }}</h1>
+            <div class="d-flex gap-2 mt-2">
+                <span class="badge badge-{% if exercise.type == 'cardio' %}info{% elif exercise.type == 'fuerza' %}warning{% else %}success{% endif %}">
+                    {{ exercise.type|capfirst }}
+                </span>
+                {% if exercise.difficulty %}
+                <span class="badge badge-{% if exercise.difficulty == 'alta' %}danger{% elif exercise.difficulty == 'media' %}warning{% else %}success{% endif %}">
+                    Dificultad: {{ exercise.difficulty|capfirst }}
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            {% if exercise.created_by == user.username %}
+            <a href="{% url 'exercise_edit' exercise.id %}" class="btn btn-outline">Editar</a>
+            {% endif %}
+            <a href="{% url 'exercises_list' %}" class="btn btn-secondary">Volver</a>
+        </div>
+    </div>
+
+    {% if exercise.description %}
+    <div class="mb-3">
+        <h3>Descripción</h3>
+        <p>{{ exercise.description }}</p>
+    </div>
+    {% endif %}
+
+    <div class="grid grid-2 mb-3">
+        {% if exercise.duration %}
+        <div class="metric">
+            <div class="metric-value">⏱️ {{ exercise.duration }} min</div>
+            <div class="metric-label">Duración estimada</div>
+        </div>
+        {% endif %}
+        {% if exercise.created_at %}
+        <div class="metric">
+            <div class="metric-value">📅 {{ exercise.created_at|date:"d/m/Y" }}</div>
+            <div class="metric-label">Fecha de creación</div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if exercise.video_url %}
+    <div class="mb-3">
+        <h3>Video Demostrativo</h3>
+        <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: var(--border-radius);">
+            <iframe 
+                src="{{ exercise.video_url }}" 
+                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        </div>
+        <a href="{{ exercise.video_url }}" target="_blank" class="btn btn-outline mt-2">
+            Abrir video en nueva pestaña
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="d-flex gap-2">
+        <a href="{% url 'routine_create' %}?exercise_id={{ exercise.id }}" class="btn btn-primary">
+            ➕ Agregar a una Rutina
+        </a>
+        <a href="{% url 'progress_create' %}?exercise_id={{ exercise.id }}" class="btn btn-secondary">
+            📝 Registrar Progreso
+        </a>
+    </div>
+</div>
+{% endblock %}
+

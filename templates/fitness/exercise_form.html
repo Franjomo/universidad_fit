@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if exercise %}Editar Ejercicio{% else %}Crear Ejercicio{% endif %} - Universidad Fit{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">
+            {% if exercise %}Editar Ejercicio{% else %}Crear Ejercicio Personalizado{% endif %}
+        </h1>
+        <a href="{% url 'exercises_list' %}" class="btn btn-secondary">Cancelar</a>
+    </div>
+
+    <form method="post" id="exerciseForm">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+            <div class="notification notification-error">
+                <span>Por favor, corrige los errores en el formulario.</span>
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="id_name" class="form-label">Nombre del Ejercicio *</label>
+            <input 
+                type="text" 
+                name="name" 
+                id="id_name" 
+                class="form-control" 
+                placeholder="Ej: Sentadillas con salto"
+                required
+                maxlength="100"
+                value="{{ form.name.value|default:exercise.name|default:'' }}"
+            >
+            {% if form.name.errors %}
+                <div class="form-error">{{ form.name.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="id_type" class="form-label">Tipo de Ejercicio *</label>
+            <select name="type" id="id_type" class="form-control" required>
+                <option value="">Seleccionar tipo...</option>
+                <option value="cardio" {% if form.type.value == 'cardio' or exercise.type == 'cardio' %}selected{% endif %}>Cardio</option>
+                <option value="fuerza" {% if form.type.value == 'fuerza' or exercise.type == 'fuerza' %}selected{% endif %}>Fuerza</option>
+                <option value="movilidad" {% if form.type.value == 'movilidad' or exercise.type == 'movilidad' %}selected{% endif %}>Movilidad</option>
+            </select>
+            {% if form.type.errors %}
+                <div class="form-error">{{ form.type.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="id_description" class="form-label">Descripción</label>
+            <textarea 
+                name="description" 
+                id="id_description" 
+                class="form-control" 
+                placeholder="Describe cómo realizar el ejercicio, músculos trabajados, etc..."
+                rows="5"
+            >{{ form.description.value|default:exercise.description|default:'' }}</textarea>
+            {% if form.description.errors %}
+                <div class="form-error">{{ form.description.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div class="grid grid-2">
+            <div class="form-group">
+                <label for="id_duration" class="form-label">Duración (minutos)</label>
+                <input 
+                    type="number" 
+                    name="duration" 
+                    id="id_duration" 
+                    class="form-control" 
+                    placeholder="Ej: 30"
+                    step="0.1"
+                    min="0"
+                    value="{{ form.duration.value|default:exercise.duration|default:'' }}"
+                >
+                {% if form.duration.errors %}
+                    <div class="form-error">{{ form.duration.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_difficulty" class="form-label">Dificultad</label>
+                <select name="difficulty" id="id_difficulty" class="form-control">
+                    <option value="">Seleccionar dificultad...</option>
+                    <option value="baja" {% if form.difficulty.value == 'baja' or exercise.difficulty == 'baja' %}selected{% endif %}>Baja</option>
+                    <option value="media" {% if form.difficulty.value == 'media' or exercise.difficulty == 'media' %}selected{% endif %}>Media</option>
+                    <option value="alta" {% if form.difficulty.value == 'alta' or exercise.difficulty == 'alta' %}selected{% endif %}>Alta</option>
+                </select>
+                {% if form.difficulty.errors %}
+                    <div class="form-error">{{ form.difficulty.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="id_video_url" class="form-label">URL del Video Demostrativo</label>
+            <input 
+                type="url" 
+                name="video_url" 
+                id="id_video_url" 
+                class="form-control" 
+                placeholder="https://www.youtube.com/watch?v=..."
+                value="{{ form.video_url.value|default:exercise.video_url|default:'' }}"
+            >
+            <div class="form-help">Puedes usar enlaces de YouTube, Vimeo u otros servicios de video</div>
+            {% if form.video_url.errors %}
+                <div class="form-error">{{ form.video_url.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+                {% if exercise %}Actualizar Ejercicio{% else %}Crear Ejercicio{% endif %}
+            </button>
+            <a href="{% url 'exercises_list' %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('exerciseForm').addEventListener('submit', function(e) {
+        if (!validateForm('exerciseForm')) {
+            e.preventDefault();
+        }
+    });
+</script>
+{% endblock %}
+

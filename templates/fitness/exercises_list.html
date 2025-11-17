@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ejercicios - Universidad Fit{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">Ejercicios Disponibles</h1>
+        <a href="{% url 'exercise_create' %}" class="btn btn-primary">➕ Crear Ejercicio Personalizado</a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="d-flex justify-between align-center mb-3" style="flex-wrap: wrap; gap: 1rem;">
+        <input 
+            type="text" 
+            id="searchExercises" 
+            class="form-control" 
+            placeholder="Buscar ejercicios..."
+            style="max-width: 300px;"
+        >
+        <select id="filterType" class="form-control" style="max-width: 200px;">
+            <option value="">Todos los tipos</option>
+            <option value="cardio">Cardio</option>
+            <option value="fuerza">Fuerza</option>
+            <option value="movilidad">Movilidad</option>
+        </select>
+        <select id="filterDifficulty" class="form-control" style="max-width: 200px;">
+            <option value="">Todas las dificultades</option>
+            <option value="baja">Baja</option>
+            <option value="media">Media</option>
+            <option value="alta">Alta</option>
+        </select>
+    </div>
+
+    <!-- Lista de Ejercicios -->
+    {% if exercises %}
+    <div class="grid grid-3" id="exercisesGrid">
+        {% for exercise in exercises %}
+        <div class="exercise-card" 
+             data-exercise-name="{{ exercise.name|lower }}" 
+             data-exercise-type="{{ exercise.type }}"
+             data-exercise-difficulty="{{ exercise.difficulty }}">
+            <div class="exercise-header">
+                <h3 class="exercise-title">{{ exercise.name }}</h3>
+                <span class="badge badge-{% if exercise.type == 'cardio' %}info{% elif exercise.type == 'fuerza' %}warning{% else %}success{% endif %}">
+                    {{ exercise.type }}
+                </span>
+            </div>
+            <p class="exercise-description">{{ exercise.description|default:"Sin descripción"|truncatewords:20 }}</p>
+            <div class="exercise-details">
+                {% if exercise.duration %}
+                <span class="exercise-detail">⏱️ {{ exercise.duration }} min</span>
+                {% endif %}
+                {% if exercise.difficulty %}
+                <span class="exercise-detail">
+                    <span class="badge badge-{% if exercise.difficulty == 'alta' %}danger{% elif exercise.difficulty == 'media' %}warning{% else %}success{% endif %}">
+                        {{ exercise.difficulty|capfirst }}
+                    </span>
+                </span>
+                {% endif %}
+            </div>
+            {% if exercise.video_url %}
+            <div class="mt-2">
+                <a href="{{ exercise.video_url }}" target="_blank" class="btn btn-outline btn-sm">
+                    🎥 Ver Video
+                </a>
+            </div>
+            {% endif %}
+            <div class="d-flex gap-2 mt-3">
+                <a href="{% url 'exercise_detail' exercise.id %}" class="btn btn-primary btn-sm">Ver Detalles</a>
+                {% if exercise.created_by == user.username %}
+                <a href="{% url 'exercise_edit' exercise.id %}" class="btn btn-outline btn-sm">Editar</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">💪</div>
+        <h3>No hay ejercicios disponibles</h3>
+        <p>Crea tu primer ejercicio personalizado</p>
+        <a href="{% url 'exercise_create' %}" class="btn btn-primary mt-2">Crear Ejercicio</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    setupSearch('searchExercises', '.exercise-card');
+    
+    document.getElementById('filterType').addEventListener('change', filterExercises);
+    document.getElementById('filterDifficulty').addEventListener('change', filterExercises);
+    
+    function filterExercises() {
+        const typeFilter = document.getElementById('filterType').value;
+        const difficultyFilter = document.getElementById('filterDifficulty').value;
+        const exercises = document.querySelectorAll('.exercise-card');
+        
+        exercises.forEach(exercise => {
+            const exerciseType = exercise.getAttribute('data-exercise-type');
+            const exerciseDifficulty = exercise.getAttribute('data-exercise-difficulty');
+            
+            const typeMatch = !typeFilter || exerciseType === typeFilter;
+            const difficultyMatch = !difficultyFilter || exerciseDifficulty === difficultyFilter;
+            
+            if (typeMatch && difficultyMatch) {
+                exercise.style.display = '';
+            } else {
+                exercise.style.display = 'none';
+            }
+        });
+    }
+</script>
+{% endblock %}
+

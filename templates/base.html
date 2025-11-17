@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Universidad Fit - ICESI{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navegación -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="{% url 'home' %}" style="text-decoration: none;">
+                    <h1>🏋️ Universidad Fit</h1>
+                </a>
+            </div>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-menu" id="navMenu">
+                {% if user.is_authenticated %}
+                    {% if user.role == 'STUDENT' or user.role == 'EMPLOYEE' %}
+                        <li><a href="{% url 'student_dashboard' %}">Mi Dashboard</a></li>
+                        <li><a href="{% url 'routines_list' %}">Rutinas</a></li>
+                        <li><a href="{% url 'exercises_list' %}">Ejercicios</a></li>
+                        <li><a href="{% url 'progress_list' %}">Mi Progreso</a></li>
+                        <li><a href="{% url 'reports' %}">Reportes</a></li>
+                    {% elif user.role == 'ADMIN' %}
+                        <li><a href="{% url 'admin_dashboard' %}">Dashboard Admin</a></li>
+                        <li><a href="{% url 'trainer_management' %}">Gestión Entrenadores</a></li>
+                        <li><a href="{% url 'admin_reports' %}">Reportes</a></li>
+                    {% endif %}
+                    <li class="nav-user">
+                        <span>👤 {{ user.username }}</span>
+                        <a href="{% url 'logout' %}" class="btn-logout">Cerrar Sesión</a>
+                    </li>
+                {% else %}
+                    <li><a href="{% url 'login' %}">Iniciar Sesión</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Notificaciones -->
+    {% if messages %}
+        <div class="notifications-container" id="notifications">
+            {% for message in messages %}
+                <div class="notification notification-{{ message.tags }}">
+                    <span>{{ message }}</span>
+                    <button class="notification-close" onclick="this.parentElement.remove()">×</button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Pie de Página -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>Universidad ICESI</h3>
+                <p>Sistema de Gestión de Rutinas de Ejercicio</p>
+            </div>
+            <div class="footer-section">
+                <h4>Contacto</h4>
+                <p>Email: deportes@icesi.edu.co</p>
+                <p>Teléfono: (2) 555 2334</p>
+            </div>
+            <div class="footer-section">
+                <h4>Enlaces</h4>
+                <ul>
+                    <li><a href="https://www.icesi.edu.co">Sitio Web ICESI</a></li>
+                    <li><a href="#">Política de Privacidad</a></li>
+                    <li><a href="#">Términos de Uso</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Horarios</h4>
+                <p>Lunes - Viernes: 6:00 AM - 10:00 PM</p>
+                <p>Sábados: 8:00 AM - 6:00 PM</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Universidad ICESI. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+
+

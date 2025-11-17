@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if progress %}Editar Progreso{% else %}Registrar Progreso{% endif %} - Universidad Fit{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">
+            {% if progress %}Editar Progreso{% else %}Registrar Nuevo Progreso{% endif %}
+        </h1>
+        <a href="{% url 'progress_list' %}" class="btn btn-secondary">Cancelar</a>
+    </div>
+
+    <form method="post" id="progressForm">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+            <div class="notification notification-error">
+                <span>Por favor, corrige los errores en el formulario.</span>
+            </div>
+        {% endif %}
+
+        <div class="grid grid-2">
+            <div class="form-group">
+                <label for="id_routine_id" class="form-label">Rutina (Opcional)</label>
+                <select name="routine_id" id="id_routine_id" class="form-control">
+                    <option value="">Seleccionar rutina...</option>
+                    {% for routine in available_routines %}
+                    <option value="{{ routine.id }}" 
+                            {% if form.routine_id.value == routine.id|stringformat:"s" or request.GET.routine_id == routine.id|stringformat:"s" %}selected{% endif %}>
+                        {{ routine.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+                {% if form.routine_id.errors %}
+                    <div class="form-error">{{ form.routine_id.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_exercise_id" class="form-label">Ejercicio (Opcional)</label>
+                <select name="exercise_id" id="id_exercise_id" class="form-control">
+                    <option value="">Seleccionar ejercicio...</option>
+                    {% for exercise in available_exercises %}
+                    <option value="{{ exercise.id }}" 
+                            {% if form.exercise_id.value == exercise.id|stringformat:"s" or request.GET.exercise_id == exercise.id|stringformat:"s" %}selected{% endif %}>
+                        {{ exercise.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+                {% if form.exercise_id.errors %}
+                    <div class="form-error">{{ form.exercise_id.errors.0 }}</div>
+                {% endif %}
+                <div class="form-help">Si no seleccionas rutina ni ejercicio, se registrará como progreso general</div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="id_date" class="form-label">Fecha *</label>
+            <input 
+                type="date" 
+                name="date" 
+                id="id_date" 
+                class="form-control" 
+                required
+                value="{{ form.date.value|default:progress.date|date:'Y-m-d'|default:'' }}"
+            >
+            {% if form.date.errors %}
+                <div class="form-error">{{ form.date.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div class="grid grid-2">
+            <div class="form-group">
+                <label for="id_repetitions" class="form-label">Repeticiones</label>
+                <input 
+                    type="number" 
+                    name="repetitions" 
+                    id="id_repetitions" 
+                    class="form-control" 
+                    min="0"
+                    value="{{ form.repetitions.value|default:progress.repetitions|default:'' }}"
+                >
+                {% if form.repetitions.errors %}
+                    <div class="form-error">{{ form.repetitions.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_duration" class="form-label">Duración (minutos)</label>
+                <input 
+                    type="number" 
+                    name="duration" 
+                    id="id_duration" 
+                    class="form-control" 
+                    step="0.1"
+                    min="0"
+                    value="{{ form.duration.value|default:progress.duration|default:'' }}"
+                >
+                {% if form.duration.errors %}
+                    <div class="form-error">{{ form.duration.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="id_effort_level" class="form-label">Nivel de Esfuerzo (1-10) *</label>
+            <input 
+                type="range" 
+                name="effort_level" 
+                id="id_effort_level" 
+                class="form-control" 
+                min="1"
+                max="10"
+                value="{{ form.effort_level.value|default:progress.effort_level|default:5 }}"
+                required
+                oninput="document.getElementById('effortValue').textContent = this.value"
+            >
+            <div class="d-flex justify-between">
+                <span>1 (Fácil)</span>
+                <span id="effortValue" style="font-weight: bold; color: var(--primary-color);">
+                    {{ form.effort_level.value|default:progress.effort_level|default:5 }}
+                </span>
+                <span>10 (Muy Intenso)</span>
+            </div>
+            {% if form.effort_level.errors %}
+                <div class="form-error">{{ form.effort_level.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="id_notes" class="form-label">Notas Adicionales</label>
+            <textarea 
+                name="notes" 
+                id="id_notes" 
+                class="form-control" 
+                placeholder="Cómo te sentiste, observaciones, etc..."
+                rows="4"
+            >{{ form.notes.value|default:progress.notes|default:'' }}</textarea>
+            {% if form.notes.errors %}
+                <div class="form-error">{{ form.notes.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+                {% if progress %}Actualizar Progreso{% else %}Registrar Progreso{% endif %}
+            </button>
+            <a href="{% url 'progress_list' %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('progressForm').addEventListener('submit', function(e) {
+        if (!validateForm('progressForm')) {
+            e.preventDefault();
+        }
+    });
+</script>
+{% endblock %}
+

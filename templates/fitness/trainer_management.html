@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestión de Entrenadores - Universidad Fit{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">Gestión de Entrenadores</h1>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Volver</a>
+    </div>
+
+    <!-- Lista de Entrenadores -->
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Usuarios Asignados</th>
+                    <th>Rutinas Creadas</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for trainer in trainers %}
+                <tr>
+                    <td>{{ trainer.username }}</td>
+                    <td>{{ trainer.full_name }}</td>
+                    <td>{{ trainer.email }}</td>
+                    <td>{{ trainer.assigned_users_count|default:0 }}</td>
+                    <td>{{ trainer.routines_count|default:0 }}</td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'admin_assign_users' trainer.user_id %}" class="btn btn-primary btn-sm">
+                                Asignar Usuarios
+                            </a>
+                            <a href="{% url 'admin_trainer_details' trainer.user_id %}" class="btn btn-outline btn-sm">
+                                Ver Detalles
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Enviar Recomendación - Universidad Fit{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">Enviar Recomendación a {{ user_data.full_name }}</h1>
+        <a href="{% url 'trainer_user_progress' user_data.user_id %}" class="btn btn-secondary">Cancelar</a>
+    </div>
+
+    <form method="post" id="recommendationForm">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+            <div class="notification notification-error">
+                <span>Por favor, corrige los errores en el formulario.</span>
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="id_message" class="form-label">Mensaje de Recomendación *</label>
+            <textarea 
+                name="message" 
+                id="id_message" 
+                class="form-control" 
+                placeholder="Escribe tu recomendación, consejo o comentario para el usuario..."
+                rows="6"
+                required
+            >{{ form.message.value|default:'' }}</textarea>
+            {% if form.message.errors %}
+                <div class="form-error">{{ form.message.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="id_related_routine_id" class="form-label">Rutina Relacionada (Opcional)</label>
+            <select name="related_routine_id" id="id_related_routine_id" class="form-control">
+                <option value="">Seleccionar rutina...</option>
+                {% for routine in available_routines %}
+                <option value="{{ routine.id }}" {% if form.related_routine_id.value == routine.id|stringformat:"s" %}selected{% endif %}>
+                    {{ routine.name }}
+                </option>
+                {% endfor %}
+            </select>
+            {% if form.related_routine_id.errors %}
+                <div class="form-error">{{ form.related_routine_id.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="id_related_progress_id" class="form-label">Progreso Relacionado (Opcional)</label>
+            <select name="related_progress_id" id="id_related_progress_id" class="form-control">
+                <option value="">Seleccionar progreso...</option>
+                {% for progress in user_progress %}
+                <option value="{{ progress.id }}" {% if form.related_progress_id.value == progress.id|stringformat:"s" %}selected{% endif %}>
+                    {{ progress.date|date:"d/m/Y" }} - {{ progress.routine_name|default:progress.exercise_name|default:"General" }}
+                </option>
+                {% endfor %}
+            </select>
+            {% if form.related_progress_id.errors %}
+                <div class="form-error">{{ form.related_progress_id.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Enviar Recomendación</button>
+            <a href="{% url 'trainer_user_progress' user_data.user_id %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('recommendationForm').addEventListener('submit', function(e) {
+        if (!validateForm('recommendationForm')) {
+            e.preventDefault();
+        }
+    });
+</script>
+{% endblock %}
+

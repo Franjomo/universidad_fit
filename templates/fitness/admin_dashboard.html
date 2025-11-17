@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Administración - Universidad Fit{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">Panel de Administración</h1>
+    </div>
+
+    <!-- Estadísticas Generales -->
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <div class="stat-value">{{ total_users|default:0 }}</div>
+            <div class="stat-label">Total Usuarios</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ total_trainers|default:0 }}</div>
+            <div class="stat-label">Entrenadores</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ total_routines|default:0 }}</div>
+            <div class="stat-label">Rutinas Totales</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ total_progress|default:0 }}</div>
+            <div class="stat-label">Registros de Progreso</div>
+        </div>
+    </div>
+</div>
+
+<!-- Gestión de Entrenadores -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Gestión de Entrenadores</h2>
+        <a href="{% url 'trainer_management' %}" class="btn btn-primary">Gestionar Entrenadores</a>
+    </div>
+    <p>Administra la asignación de entrenadores a usuarios y controla los permisos.</p>
+</div>
+
+<!-- Reportes -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Reportes y Análisis</h2>
+        <a href="{% url 'admin_reports' %}" class="btn btn-primary">Ver Reportes</a>
+    </div>
+    <p>Accede a reportes detallados sobre el uso de la plataforma y el progreso de los usuarios.</p>
+</div>
+{% endblock %}
+

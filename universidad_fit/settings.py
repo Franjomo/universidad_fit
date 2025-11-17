@@ -73,7 +73,7 @@ ROOT_URLCONF = 'universidad_fit.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -90,9 +90,34 @@ WSGI_APPLICATION = 'universidad_fit.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# ===== CONFIGURACIÓN DE BASE DE DATOS =====
+# Para desarrollo, usamos SQLite por defecto (sin problemas de permisos)
+# Para usar PostgreSQL, descomenta las líneas de abajo y configura DATABASE_URL en .env
+
+# Forzar SQLite para desarrollo (comentar estas líneas para usar PostgreSQL)
 DATABASES = {
-    'default': dj_database_url.parse(os.getenv('DATABASE_URL')),
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
+
+# Para usar PostgreSQL, descomenta lo siguiente:
+# DATABASE_URL = os.getenv('DATABASE_URL')
+# if DATABASE_URL:
+#     try:
+#         DATABASES = {
+#             'default': dj_database_url.parse(DATABASE_URL),
+#         }
+#     except Exception as e:
+#         print(f"Error al conectar con PostgreSQL: {e}")
+#         print("Usando SQLite como respaldo...")
+#         DATABASES = {
+#             'default': {
+#                 'ENGINE': 'django.db.backends.sqlite3',
+#                 'NAME': BASE_DIR / 'db.sqlite3',
+#             }
+#         }
 
 MONGO_URL = os.getenv('MONGO_URL')
 
@@ -131,6 +156,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inicio - Universidad Fit{% endblock %}
+
+{% block content %}
+<div class="card" style="text-align: center; padding: 4rem 2rem;">
+    <h1 style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;">
+        🏋️ Universidad Fit
+    </h1>
+    <p style="font-size: 1.25rem; color: var(--text-secondary); margin-bottom: 2rem;">
+        Sistema de Gestión de Rutinas de Ejercicio - Universidad ICESI
+    </p>
+    
+    {% if user.is_authenticated %}
+        <div class="d-flex justify-between align-center" style="max-width: 600px; margin: 0 auto; gap: 1rem; flex-wrap: wrap;">
+            {% if user.role == 'STUDENT' or user.role == 'EMPLOYEE' %}
+                <a href="{% url 'student_dashboard' %}" class="btn btn-primary" style="flex: 1; min-width: 200px;">
+                    Ir a Mi Dashboard
+                </a>
+            {% elif user.role == 'ADMIN' %}
+                <a href="{% url 'admin_dashboard' %}" class="btn btn-primary" style="flex: 1; min-width: 200px;">
+                    Panel de Administración
+                </a>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="d-flex justify-between align-center" style="max-width: 400px; margin: 0 auto; gap: 1rem;">
+            <a href="{% url 'login' %}" class="btn btn-primary" style="flex: 1;">
+                Iniciar Sesión
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<div class="grid grid-3" style="margin-top: 3rem;">
+    <div class="card">
+        <h2 style="color: var(--primary-color); margin-bottom: 1rem;">💪 Rutinas Personalizadas</h2>
+        <p>Crea y gestiona tus propias rutinas de ejercicio adaptadas a tus necesidades y objetivos.</p>
+    </div>
+    <div class="card">
+        <h2 style="color: var(--primary-color); margin-bottom: 1rem;">📊 Seguimiento de Progreso</h2>
+        <p>Registra tu progreso diario y semanal para ver tus avances y mantener la motivación.</p>
+    </div>
+    <div class="card">
+        <h2 style="color: var(--primary-color); margin-bottom: 1rem;">👨‍🏫 Entrenadores</h2>
+        <p>Recibe recomendaciones y seguimiento personalizado de entrenadores certificados.</p>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Rutinas - Universidad Fit{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">Rutinas de Ejercicio</h1>
+        <a href="{% url 'routine_create' %}" class="btn btn-primary">➕ Crear Nueva Rutina</a>
+    </div>
+
+    <!-- Filtros y Búsqueda -->
+    <div class="d-flex justify-between align-center mb-3" style="flex-wrap: wrap; gap: 1rem;">
+        <input 
+            type="text" 
+            id="searchRoutines" 
+            class="form-control" 
+            placeholder="Buscar rutinas..."
+            style="max-width: 300px;"
+        >
+        <div class="d-flex gap-2">
+            <select id="filterType" class="form-control" style="max-width: 200px;">
+                <option value="">Todas las rutinas</option>
+                <option value="my">Mis rutinas</option>
+                <option value="templates">Plantillas</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Lista de Rutinas -->
+    {% if routines %}
+    <div class="grid grid-2" id="routinesGrid">
+        {% for routine in routines %}
+        <div class="routine-card" data-routine-name="{{ routine.name|lower }}" data-routine-type="{% if routine.is_template %}templates{% else %}my{% endif %}">
+            <div class="routine-header">
+                <h3 class="routine-title">{{ routine.name }}</h3>
+                <div>
+                    {% if routine.is_template %}
+                    <span class="badge badge-info">Plantilla</span>
+                    {% else %}
+                    <span class="badge badge-primary">Personalizada</span>
+                    {% endif %}
+                </div>
+            </div>
+            <p class="exercise-description">{{ routine.description|default:"Sin descripción"|truncatewords:25 }}</p>
+            <div class="exercise-details">
+                <span class="exercise-detail">
+                    <strong>{{ routine.exercises|length }}</strong> ejercicios
+                </span>
+                <span class="exercise-detail">
+                    Creada: {{ routine.created_at|date:"d/m/Y" }}
+                </span>
+            </div>
+            <div class="d-flex gap-2 mt-3">
+                <a href="{% url 'routine_detail' routine.id %}" class="btn btn-primary btn-sm">Ver Detalles</a>
+                {% if not routine.is_template %}
+                <a href="{% url 'routine_edit' routine.id %}" class="btn btn-outline btn-sm">Editar</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">🏋️</div>
+        <h3>No hay rutinas disponibles</h3>
+        <p>Crea tu primera rutina o espera a que se publiquen plantillas</p>
+        <a href="{% url 'routine_create' %}" class="btn btn-primary mt-2">Crear Rutina</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    setupSearch('searchRoutines', '.routine-card');
+    
+    document.getElementById('filterType').addEventListener('change', function(e) {
+        const filter = e.target.value;
+        const routines = document.querySelectorAll('.routine-card');
+        
+        routines.forEach(routine => {
+            if (!filter || routine.getAttribute('data-routine-type') === filter) {
+                routine.style.display = '';
+            } else {
+                routine.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}
+

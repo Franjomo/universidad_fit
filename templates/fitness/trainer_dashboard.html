@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Entrenador - Universidad Fit{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">Dashboard de Entrenador</h1>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <div class="stat-value">{{ assigned_users|default:0 }}</div>
+            <div class="stat-label">Usuarios Asignados</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ total_routines_created|default:0 }}</div>
+            <div class="stat-label">Rutinas Creadas</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ total_recommendations|default:0 }}</div>
+            <div class="stat-label">Recomendaciones Enviadas</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ pending_followups|default:0 }}</div>
+            <div class="stat-label">Seguimientos Pendientes</div>
+        </div>
+    </div>
+</div>
+
+<!-- Usuarios Asignados -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Usuarios Asignados</h2>
+        <input 
+            type="text" 
+            id="searchUsers" 
+            class="form-control" 
+            placeholder="Buscar usuarios..."
+            style="max-width: 300px;"
+        >
+    </div>
+    {% if assigned_users_list %}
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Último Progreso</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user_data in assigned_users_list %}
+                <tr>
+                    <td>{{ user_data.username }}</td>
+                    <td>{{ user_data.full_name }}</td>
+                    <td>{{ user_data.email }}</td>
+                    <td>
+                        {% if user_data.last_progress %}
+                            {{ user_data.last_progress|date:"d/m/Y" }}
+                        {% else %}
+                            <span style="color: var(--text-secondary);">Sin registros</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'trainer_user_progress' user_data.user_id %}" class="btn btn-primary btn-sm">
+                                Ver Progreso
+                            </a>
+                            <a href="{% url 'trainer_send_recommendation' user_data.user_id %}" class="btn btn-outline btn-sm">
+                                Enviar Recomendación
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">👥</div>
+        <h3>No tienes usuarios asignados</h3>
+        <p>Contacta al administrador para que te asignen usuarios</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Rutinas Prediseñadas -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Mis Rutinas Prediseñadas</h2>
+        <a href="{% url 'routine_create' %}" class="btn btn-primary">➕ Crear Nueva Rutina</a>
+    </div>
+    {% if trainer_routines %}
+    <div class="grid grid-2">
+        {% for routine in trainer_routines %}
+        <div class="routine-card">
+            <div class="routine-header">
+                <h3 class="routine-title">{{ routine.name }}</h3>
+                {% if routine.is_template %}
+                <span class="badge badge-info">Plantilla</span>
+                {% endif %}
+            </div>
+            <p class="exercise-description">{{ routine.description|truncatewords:20 }}</p>
+            <div class="d-flex gap-2 mt-3">
+                <a href="{% url 'routine_detail' routine.id %}" class="btn btn-primary btn-sm">Ver Detalles</a>
+                <a href="{% url 'routine_edit' routine.id %}" class="btn btn-outline btn-sm">Editar</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>No has creado rutinas prediseñadas aún</p>
+        <a href="{% url 'routine_create' %}" class="btn btn-primary mt-2">Crear Primera Rutina</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    setupSearch('searchUsers', 'tbody tr');
+</script>
+{% endblock %}
+
