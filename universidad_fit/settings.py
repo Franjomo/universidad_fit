@@ -95,31 +95,36 @@ WSGI_APPLICATION = 'universidad_fit.wsgi.application'
 # Para usar PostgreSQL, descomenta las líneas de abajo y configura DATABASE_URL en .env
 
 # Forzar SQLite para desarrollo (comentar estas líneas para usar PostgreSQL)
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': BASE_DIR / 'db.sqlite3',
+#    }
+#}
 
-# Para usar PostgreSQL, descomenta lo siguiente:
-# DATABASE_URL = os.getenv('DATABASE_URL')
-# if DATABASE_URL:
-#     try:
-#         DATABASES = {
-#             'default': dj_database_url.parse(DATABASE_URL),
-#         }
-#     except Exception as e:
-#         print(f"Error al conectar con PostgreSQL: {e}")
-#         print("Usando SQLite como respaldo...")
-#         DATABASES = {
-#             'default': {
-#                 'ENGINE': 'django.db.backends.sqlite3',
-#                 'NAME': BASE_DIR / 'db.sqlite3',
-#             }
-#         }
+#Para usar PostgreSQL, descomenta lo siguiente:
+DATABASE_URL = os.getenv('DATABASE_URL')
+if DATABASE_URL:
+    try:
+        DATABASES = {
+            'default': dj_database_url.parse(DATABASE_URL),
+        }
+    except Exception as e:
+        print(f"Error al conectar con PostgreSQL: {e}")
+        print("Usando SQLite como respaldo...")
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
 
 MONGO_URL = os.getenv('MONGO_URL')
+
+connect(
+    db='fitness',
+    alias="fitness",
+    host=MONGO_URL)
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

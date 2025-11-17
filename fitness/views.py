@@ -1,25 +1,25 @@
-# fitness/views.py
-from django.shortcuts import render, redirect
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
+
+from fitness.forms import ExerciseForm, RoutineForm
+from fitness.models import Exercise, Routine, RoutineExercise, Progress  # MongoEngine models
 
 # Importar modelos (descomentar cuando estén disponibles)
 # from fitness.models import Exercise, Routine, Progress
 
 @login_required
 def student_dashboard(request):
-    """Dashboard para estudiantes y empleados"""
     user_id = str(request.user.username)
-    
-    # Datos de ejemplo - reemplazar con consultas reales a tus modelos
+
     context = {
-        'total_routines': 0,
-        'total_progress': 0,
+        'total_routines': Routine.objects(user_id=user_id).count(),
+        'total_progress': Progress.objects(user_id=user_id).count(),
         'weekly_workouts': 0,
         'current_streak': 0,
-        'recent_routines': [],
-        'recent_progress': [],
+        'recent_routines': Routine.objects(user_id=user_id).order_by("-created_at")[:5],
+        'recent_progress': Progress.objects(user_id=user_id).order_by("-date")[:5],
         'notifications': [
             {
                 'title': 'Bienvenido a Universidad Fit',
@@ -28,109 +28,215 @@ def student_dashboard(request):
             }
         ],
     }
-    
-    # Descomentar cuando tengas los modelos configurados:
-    # exercises = Exercise.objects(created_by__in=[user_id, "system"])
-    # progress = Progress.objects(user_id=user_id).order_by("-date")[:20]
-    # context.update({
-    #     'total_routines': Routine.objects(user_id=user_id).count(),
-    #     'total_progress': Progress.objects(user_id=user_id).count(),
-    #     'recent_routines': Routine.objects(user_id=user_id).order_by('-created_at')[:5],
-    #     'recent_progress': Progress.objects(user_id=user_id).order_by('-date')[:5],
-    # })
-    
+
     return render(request, "fitness/student_dashboard.html", context)
 
 
 @login_required
 def routines_list(request):
-    """Lista de rutinas"""
     user_id = str(request.user.username)
-    
-    context = {
-        'routines': [],
-    }
-    
-    # Descomentar cuando tengas los modelos:
-    # routines = Routine.objects(
-    #     __raw__={
-    #         '$or': [
-    #             {'user_id': user_id},
-    #             {'is_template': True}
-    #         ]
-    #     }
-    # ).order_by('-created_at')
-    # context['routines'] = routines
-    
-    return render(request, 'fitness/routines_list.html', context)
 
+    # Mostrar rutinas propias + plantillas
+    routines = Routine.objects.filter(
+        __raw__={
+            "$or": [
+                {"created_by": user_id},
+                {"is_template": True}
+            ]
+        }
+    ).order_by("-created_at")
+
+    return render(request, "fitness/routines_list.html", {
+        "routines": routines
+    })
 
 @login_required
 def routine_detail(request, routine_id):
-    """Detalle de rutina"""
-    context = {
-        'routine': None,
-    }
-    
-    # Descomentar cuando tengas los modelos:
-    # routine = Routine.objects(id=routine_id).first()
-    # if not routine:
-    #     messages.error(request, 'Rutina no encontrada')
-    #     return redirect('routines_list')
-    # context['routine'] = routine
-    
-    return render(request, 'fitness/routine_detail.html', context)
+    routine = Routine.objects(id=routine_id).first()
+    if not routine:
+        messages.error(request, "La rutina no existe.")
+        return redirect("routines_list")
 
+    return render(request, "fitness/routine_detail.html", {
+        "routine": routine
+    })
 
 @login_required
 def routine_create(request):
-    """Crear nueva rutina"""
-    if request.method == 'POST':
-        # Procesar formulario aquí
-        messages.success(request, 'Rutina creada exitosamente')
-        return redirect('routines_list')
-    
-    # Para el formulario, necesitas pasar los ejercicios disponibles
-    import json
-    context = {
-        'available_exercises': json.dumps([]),
-    }
-    
-    return render(request, 'fitness/routine_form.html', context)
+    if request.method == "POST":
+        name = request.POST.get("name")
+        description = request.POST.get("description")
+        is_template = bool(request.POST.get("is_template"))
+
+        exercises_data = []
+        for key, value in request.POST.items():
+            # detect keys like exercises[1][exercise_id]
+            if key.startswith("exercises") and key.endswith("[exercise_id]"):
+                index = key.split("[")[1].split("]")[0]
+
+                exercise_id = value
+                sets = request.POST.get(f"exercises[{index}][sets]")
+                reps = request.POST.get(f"exercises[{index}][reps]")
+                rest = request.POST.get(f"exercises[{index}][rest]")
+
+                # Convert to Exercise object
+                exercise_obj = Exercise.objects(id=exercise_id).first()
+
+                exercises_data.append(
+                    RoutineExercise(
+                        exercise=exercise_obj,
+                        sets=int(sets) if sets else None,
+                        reps=int(reps) if reps else None,
+                        rest=int(rest) if rest else None,
+                    )
+                )
+
+        routine = Routine(
+            name=name,
+            description=description,
+            exercises=exercises_data,
+            created_by=str(request.user.username),
+            is_template=is_template
+        )
+        routine.save()
+        return redirect("routines_list")
+
+    # GET
+    return render(request, "fitness/routine_form.html", {
+        "form": RoutineForm(),
+        "available_exercises": [
+            {"id": str(ex.id), "name": ex.name, "type": ex.type}
+            for ex in Exercise.objects()
+        ]
+    })
+
+@login_required
+def routine_edit(request, routine_id):
+    routine = Routine.objects(id=routine_id).first()
+    if not routine:
+        messages.error(request, "Rutina no encontrada.")
+        return redirect("routines_list")
+
+    available_exercises = [
+        {"id": str(ex.id), "name": ex.name, "type": ex.type}
+        for ex in Exercise.objects()
+    ]
+
+    if request.method == "POST":
+        routine.name = request.POST.get("name")
+        routine.description = request.POST.get("description")
+        routine.is_template = bool(request.POST.get("is_template"))
+
+        # Procesar ejercicios enviados en el formulario
+        updated_exercises = []
+
+        for key, value in request.POST.items():
+            if key.startswith("exercises") and key.endswith("[exercise_id]"):
+                idx = key.split("[")[1].split("]")[0]
+
+                exercise_id = value
+                sets = request.POST.get(f"exercises[{idx}][sets]")
+                reps = request.POST.get(f"exercises[{idx}][reps]")
+                rest = request.POST.get(f"exercises[{idx}][rest]")
+
+                # Buscar Exercise real
+                exercise_obj = Exercise.objects(id=exercise_id).first()
+
+                updated_exercises.append(
+                    RoutineExercise(
+                        exercise=exercise_obj,
+                        sets=int(sets) if sets else None,
+                        reps=int(reps) if reps else None,
+                        rest=int(rest) if rest else None,
+                    )
+                )
+
+        routine.exercises = updated_exercises
+        routine.save()
+
+        messages.success(request, "Rutina actualizada correctamente.")
+        return redirect("routine_detail", routine_id=routine.id)
+
+    return render(request, "fitness/routine_form.html", {
+        "routine": routine,
+        "available_exercises": available_exercises
+    })
 
 
 @login_required
 def exercises_list(request):
-    """Lista de ejercicios"""
-    context = {
-        'exercises': [],
-    }
-    
-    # Descomentar cuando tengas los modelos:
-    # exercises = Exercise.objects.all().order_by('name')
-    # context['exercises'] = exercises
-    
-    return render(request, 'fitness/exercises_list.html', context)
+    exercises = Exercise.objects().order_by("name")
+
+    return render(request, 'fitness/exercises_list.html', {
+        'exercises': exercises
+    })
 
 
 @login_required
 def exercise_detail(request, exercise_id):
-    """Detalle de ejercicio"""
-    context = {
-        'exercise': None,
-    }
-    
-    return render(request, 'fitness/exercise_detail.html', context)
+    exercise = Exercise.objects(id=exercise_id).first()
+
+    if not exercise:
+        messages.error(request, "Ejercicio no encontrado")
+        return redirect("exercises_list")
+
+    return render(request, 'fitness/exercise_detail.html', {
+        'exercise': exercise
+    })
 
 
 @login_required
 def exercise_create(request):
-    """Crear nuevo ejercicio"""
+
     if request.method == 'POST':
-        messages.success(request, 'Ejercicio creado exitosamente')
-        return redirect('exercises_list')
-    
-    return render(request, 'fitness/exercise_form.html')
+        form = ExerciseForm(request.POST)
+
+        if form.is_valid():
+            try:
+                exercise = Exercise(
+                    name=form.cleaned_data["name"],
+                    type=form.cleaned_data["type"],
+                    description=form.cleaned_data.get("description"),
+                    duration=form.cleaned_data.get("duration"),
+                    difficulty=form.cleaned_data.get("difficulty"),
+                    video_url=form.cleaned_data.get("video_url"),
+                    created_by=str(request.user.username),
+                )
+                exercise.save()  # <-- SE GUARDA EN MONGODB
+
+                messages.success(request, 'Ejercicio creado exitosamente')
+                return redirect('exercises_list')
+
+            except Exception as e:
+                messages.error(request, f"Error al guardar ejercicio: {e}")
+
+    else:
+        form = ExerciseForm()
+
+    return render(request, 'fitness/exercise_form.html', {
+        'form': form,
+        'exercise': None,
+    })
+
+@login_required
+def exercise_edit(request, exercise_id):
+    exercise = get_object_or_404(Exercise, exercise_id=exercise_id)
+
+    # Validación opcional: Solo quien lo creó puede editar
+    if exercise.created_by != request.user.username:
+        messages.error(request, "No tienes permiso para editar este ejercicio.")
+        return redirect("exercise_detail", exercise_id=exercise_id)
+
+    if request.method == "POST":
+        exercise.name = request.POST.get("name")
+        exercise.description = request.POST.get("description")
+        exercise.video_url = request.POST.get("video_url")
+        exercise.save()
+
+        messages.success(request, "Ejercicio actualizado correctamente.")
+        return redirect("exercise_detail", exercise_id=exercise_id)
+
+    return render(request, "fitness/exercise_edit.html", {"exercise": exercise})
 
 
 @login_required

@@ -28,7 +28,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     ]
 
     username = models.CharField(max_length=30, primary_key=True)
-    password_hash = models.CharField(max_length=100, db_column='password_hash')  # mantiene el campo original SQL
+    password = models.CharField(max_length=128)  # <-- AÑADIR
+    password_hash = models.CharField(max_length=100, db_column='password_hash')
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
@@ -49,7 +50,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             models.CheckConstraint(
                 check=(
                     (models.Q(student__isnull=False, employee__isnull=True) |
-                     models.Q(student__isnull=True, employee__isnull=False))
+                    models.Q(student__isnull=True, employee__isnull=False))
                 ),
                 name='USERS_ONE_ROLE_CHK'
             )
@@ -65,9 +66,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         y con el nombre de columna original del SQL.
         """
         if self.password and not self.password.startswith('pbkdf2_'):
-            # Django usa pbkdf2_sha256 por defecto
             self.set_password(self.password)
-            self.password_hash = self.password  # sincroniza con el campo SQL
+            self.password_hash = self.password  # sincroniza
         super().save(*args, **kwargs)
     
 class Student(models.Model):

@@ -31,7 +31,7 @@
                 placeholder="Ej: Sentadillas con salto"
                 required
                 maxlength="100"
-                value="{{ form.name.value|default:exercise.name|default:'' }}"
+                value="{{ form.name.value|default:'' }}"
             >
             {% if form.name.errors %}
                 <div class="form-error">{{ form.name.errors.0 }}</div>
@@ -59,7 +59,7 @@
                 class="form-control" 
                 placeholder="Describe cómo realizar el ejercicio, músculos trabajados, etc..."
                 rows="5"
-            >{{ form.description.value|default:exercise.description|default:'' }}</textarea>
+            >{{ form.description.value|default:'' }}</textarea>
             {% if form.description.errors %}
                 <div class="form-error">{{ form.description.errors.0 }}</div>
             {% endif %}
@@ -76,7 +76,7 @@
                     placeholder="Ej: 30"
                     step="0.1"
                     min="0"
-                    value="{{ form.duration.value|default:exercise.duration|default:'' }}"
+                    value="{{ form.duration.value|default:'' }}"
                 >
                 {% if form.duration.errors %}
                     <div class="form-error">{{ form.duration.errors.0 }}</div>
@@ -105,7 +105,7 @@
                 id="id_video_url" 
                 class="form-control" 
                 placeholder="https://www.youtube.com/watch?v=..."
-                value="{{ form.video_url.value|default:exercise.video_url|default:'' }}"
+                value="{{ form.video_url.value|default:'' }}"
             >
             <div class="form-help">Puedes usar enlaces de YouTube, Vimeo u otros servicios de video</div>
             {% if form.video_url.errors %}

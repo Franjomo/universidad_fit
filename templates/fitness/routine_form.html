@@ -31,7 +31,7 @@
                 placeholder="Ej: Rutina de Fuerza Matutina"
                 required
                 maxlength="120"
-                value="{{ form.name.value|default:routine.name|default:'' }}"
+                value="{{ form.name.value|default:'' }}"
             >
             {% if form.name.errors %}
                 <div class="form-error">{{ form.name.errors.0 }}</div>
@@ -46,7 +46,7 @@
                 class="form-control" 
                 placeholder="Describe el propósito y objetivos de esta rutina..."
                 rows="4"
-            >{{ form.description.value|default:routine.description|default:'' }}</textarea>
+            >{{ form.description.value|default:'' }}</textarea>
             {% if form.description.errors %}
                 <div class="form-error">{{ form.description.errors.0 }}</div>
             {% endif %}
@@ -119,17 +119,17 @@
                 <div class="form-group">
                     <label class="form-label">Series</label>
                     <input type="number" name="exercises[${exerciseCount}][sets]" class="form-control" 
-                           value="${exerciseData ? exerciseData.sets || '' : ''}" min="1">
+                    value="${exerciseData ? exerciseData.sets || '' : ''}" min="1">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Repeticiones</label>
                     <input type="number" name="exercises[${exerciseCount}][reps]" class="form-control" 
-                           value="${exerciseData ? exerciseData.reps || '' : ''}" min="1">
+                    value="${exerciseData ? exerciseData.reps || '' : ''}" min="1">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Descanso (segundos)</label>
                     <input type="number" name="exercises[${exerciseCount}][rest]" class="form-control" 
-                           value="${exerciseData ? exerciseData.rest || '' : ''}" min="0">
+                    value="${exerciseData ? exerciseData.rest || '' : ''}" min="0">
                 </div>
             </div>
         `;

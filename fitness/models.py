@@ -1,4 +1,4 @@
-from mongoengine import Document, StringField, FloatField, IntField, ListField,DictField, BooleanField, DateTimeField, URLField
+from mongoengine import Document, StringField, FloatField, IntField, ListField, ReferenceField, BooleanField, DateTimeField, URLField, EmbeddedDocument, EmbeddedDocumentField
 from datetime import datetime
 
 class Exercise(Document):
@@ -17,14 +17,20 @@ class Exercise(Document):
         'db_alias': 'fitness',  # <- uses the alias configured in connect()
     }
 
+class RoutineExercise(EmbeddedDocument):
+    exercise = ReferenceField('Exercise', required=True) 
+    sets = IntField()
+    reps = IntField()
+    rest = IntField()
+
 class Routine(Document):
     name = StringField(required=True, max_length=120)
     description = StringField()
-    exercises = ListField(DictField())  # [{"exercise_id": "...", "sets": 3, "reps": 12, "rest": 60}]
-    created_by = StringField(required=True)  # ID of creator (user or "system")
-    is_template = BooleanField(default=False)  # True = prediseñada
-    adopted_from = StringField()  # ID de rutina original (si fue copiada)
-    user_id = StringField()  # Usuario que la adoptó (si aplica)
+    exercises = ListField(EmbeddedDocumentField(RoutineExercise))
+    created_by = StringField(required=True)
+    is_template = BooleanField(default=False)
+    adopted_from = StringField()
+    user_id = StringField()
     created_at = DateTimeField(default=datetime.utcnow)
 
     meta = {

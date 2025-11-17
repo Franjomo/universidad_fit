@@ -45,11 +45,16 @@
                     {% for exercise_data in routine.exercises %}
                     <tr>
                         <td>
-                            <strong>{{ exercise_data.exercise_name|default:"Ejercicio" }}</strong>
+                            <strong>{{ exercise_data.exercise.name }}</strong>
                         </td>
                         <td>
-                            <span class="badge badge-{% if exercise_data.exercise_type == 'cardio' %}info{% elif exercise_data.exercise_type == 'fuerza' %}warning{% else %}success{% endif %}">
-                                {{ exercise_data.exercise_type|default:"N/A" }}
+                            <span class="badge badge-
+                                {% if exercise_data.exercise.type == 'cardio' %}info
+                                {% elif exercise_data.exercise.type == 'fuerza' %}warning
+                                {% else %}success
+                                {% endif %}
+                            ">
+                                {{ exercise_data.exercise.type }}
                             </span>
                         </td>
                         <td>{{ exercise_data.sets|default:"-" }}</td>
@@ -79,4 +84,3 @@
     </div>
 </div>
 {% endblock %}
-

@@ -9,11 +9,13 @@ urlpatterns = [
     path('routines/', views.routines_list, name='routines_list'),
     path('routines/create/', views.routine_create, name='routine_create'),
     path('routines/<str:routine_id>/', views.routine_detail, name='routine_detail'),
+    path('routines/<str:routine_id>/edit/', views.routine_edit, name='routine_edit'),  # ← FALTABA
     
     # Ejercicios
     path('exercises/', views.exercises_list, name='exercises_list'),
     path('exercises/create/', views.exercise_create, name='exercise_create'),
     path('exercises/<str:exercise_id>/', views.exercise_detail, name='exercise_detail'),
+    path('exercises/<str:exercise_id>/edit/', views.exercise_edit, name='exercise_edit'),
     
     # Progreso
     path('progress/', views.progress_list, name='progress_list'),
